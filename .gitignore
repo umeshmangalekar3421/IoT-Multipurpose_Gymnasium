@@ -1,0 +1,21 @@
+# Analysis outputs (large, regenerable)
+runs/
+data/
+models/
+*.mp4
+*.avi
+*.mov
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.coverage
+
+# OS
+.DS_Store

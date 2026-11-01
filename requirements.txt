@@ -1,0 +1,11 @@
+# Runtime (edge device or laptop)
+numpy>=1.23
+opencv-python>=4.8          # use opencv-python-headless on a server / Jetson
+PyYAML>=6.0
+
+# Optional: only needed for the trained ball detector (detector.ball: yolo)
+# ultralytics>=8.1
+# torch>=2.0
+
+# Development
+pytest>=7.4

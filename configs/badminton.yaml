@@ -1,0 +1,66 @@
+# Badminton — BWF singles, best of 3 to 21 points.
+# This file documents every knob; all values shown are the defaults.
+
+sport: badminton
+
+match:
+  format: singles            # singles | doubles
+  best_of: 3
+  players: [P1, P2]          # first entry = player on court side A (far half)
+  first_server: P1
+  switch_sides_at_half: true
+
+video:
+  fps: null                  # null = read from the container (recommended)
+  max_frames: null           # analyse only the first N frames (debug)
+  stride: 1                  # 1 = every frame; 2 = every other frame (faster)
+
+camera:
+  # Calibration, in order of preference.
+  # 1) four court corners in the image, clockwise from the FAR-LEFT corner
+  #    (this is the order the `smartgym calibrate` command prints).
+  court_corners_img: null    # e.g. [[420,100], [860,100], [1260,684], [20,684]]
+  # 2) a full 3x3 image->court-metres homography measured offline
+  homography: null
+  # 3) let the system detect the painted lines (convenience, less accurate)
+  auto_calibrate: true
+
+detector:
+  ball: classical            # classical | yolo | none
+  profile: shuttle           # shuttle | tennis_ball | generic (classical only)
+  weights: null              # path to a trained YOLO model when ball: yolo
+  conf: 0.45                 # minimum detector confidence
+  imgsz: 640
+  device: cpu
+  players: none              # none | motion  (improves strike attribution)
+
+tracking:
+  mode: offline              # offline = best accuracy (files); online = live stream
+  gate_px: 90
+  max_coast_frames: 12
+  min_track_points: 6
+  min_displacement_px: 90
+  min_mean_speed_px_s: 110
+
+events:
+  model: rules               # rules | mlp  (mlp needs model_path)
+  model_path: null           # e.g. models/event_mlp.npz
+  min_bounce_prominence_px: 8
+  min_bounce_spacing_frames: 4
+  line_margin_m: 0.03        # shuttle/ball radius: a landing 3 cm out is still IN
+  rally_gap_frames: 120      # 4 s at 30 fps without contact ends the rally
+  confirm_landing_frames: 10 # window in which a landing can be revoked by a return
+  on_track_loss: opponent    # opponent | striker | none
+
+evidence:
+  enabled: true
+  out_dir: runs/badminton
+  pre_frames: 15
+  post_frames: 40
+  jpeg_quality: 90
+  annotate: true
+  save_scoreboard_png: true
+
+output:
+  timeline_json: null        # defaults to <out_dir>/match.json
+  annotated_video: null      # e.g. runs/badminton/annotated.mp4 (third pass)
