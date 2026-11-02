@@ -42,11 +42,22 @@ video ──► calibrate court ──► track ball ──► extract events �
 ## 2. Quick start
 
 ```bash
-pip install -r requirements.txt          # numpy, opencv, pyyaml, pytest
-make test                                # 70 tests, no data needed
-make demo                                # render a match, score it, write proof images
-make dashboard                           # browse the result at http://localhost:8080
+git clone https://github.com/umeshmangalekar3421/IoT-Multipurpose_Gymnasium.git
+cd IoT-Multipurpose_Gymnasium
+pip install -r requirements.txt          # numpy, opencv-python-headless, pyyaml, pytest
+python -m smartgym.cli info              # environment check: versions + fixes
+python -m pytest tests -q                # 70 tests, no data needed
+python -m smartgym.cli demo --sport badminton --out runs/demo
+python -m smartgym.service.dashboard runs/demo    # http://localhost:8080
 ```
+
+`pip install -e .` also works and gives you a `smartgym` command on the PATH
+(`smartgym demo`, `smartgym analyze`, `smartgym info`, ...).
+
+> **`ImportError: libGL.so.1`?** You have the GUI OpenCV build. This project
+> never opens a window, so use the headless build:
+> `pip uninstall -y opencv-python && pip install opencv-python-headless`.
+> `python -m smartgym.cli info` diagnoses this and every other dependency.
 
 `make demo` needs **no data at all**: it renders a synthetic badminton match with
 known ground truth, analyses it, and prints a comparison:
