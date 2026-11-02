@@ -258,7 +258,68 @@ def cmd_info(args: argparse.Namespace) -> int:
     for name, spec in PRESETS.items():
         print(f"  {name:<10} {spec.length:.2f} x {spec.width:.2f} m "
               f"(singles {spec.singles_width:.2f} m), net {spec.net_height_m} m")
-    return 0
+    print("\nEnvironment:")
+    problems = _environment_report()
+    return 1 if problems else 0
+
+
+def _environment_report() -> List[str]:
+    """Check the runtime and print an actionable message for each failure.
+
+    Every entry here is a problem that *actually* stopped a run during
+    development, so the checks are worth their lines: they turn a traceback into
+    a one-line fix.
+    """
+    problems: List[str] = []
+    print(f"  python      {sys.version.split()[0]}")
+    try:
+        import numpy as np
+        print(f"  numpy       {np.__version__}")
+    except Exception as exc:                                  # pragma: no cover
+        print(f"  numpy       MISSING ({exc})")
+        problems.append("pip install numpy")
+
+    try:
+        import cv2
+        print(f"  opencv      {cv2.__version__}")
+        try:
+            info = cv2.getBuildInformation()
+            if "GUI: " in info and "NONE" in info.split("GUI: ", 1)[1][:20]:
+                print("  opencv gui  none (headless build - expected)")
+        except Exception:
+            pass
+    except Exception as exc:                                  # pragma: no cover
+        msg = str(exc)
+        if "libGL" in msg:
+            print("  opencv      BROKEN: the GUI build is installed but libGL is "
+                  "missing (headless Linux / Docker / Jetson / Pi)")
+            problems.append("pip uninstall -y opencv-python && "
+                            "pip install opencv-python-headless")
+        else:
+            print(f"  opencv      MISSING ({msg})")
+            problems.append("pip install opencv-python-headless")
+
+    try:
+        import yaml
+        print(f"  pyyaml      {yaml.__version__}")
+    except Exception:                                         # pragma: no cover
+        print("  pyyaml      MISSING")
+        problems.append("pip install pyyaml")
+
+    try:
+        import pytest
+        print(f"  pytest      {pytest.__version__} (test suite available)")
+    except Exception:                                         # pragma: no cover
+        print("  pytest      not installed (only needed for `pytest tests`)")
+
+    if problems:
+        print("\nproblems found:")
+        for p in problems:
+            print(f"  -> {p}")
+        print("\nfix everything at once:  pip install -r requirements.txt")
+    else:
+        print("\nall runtime dependencies OK")
+    return problems
 
 
 # --------------------------------------------------------------------------- #

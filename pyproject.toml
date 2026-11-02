@@ -11,7 +11,11 @@ requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [{name = "IoT Multipurpose Gymnasium project"}]
 keywords = ["iot", "edge-ai", "sports-analytics", "badminton", "tennis", "computer-vision"]
-dependencies = ["numpy>=1.23", "opencv-python>=4.8", "PyYAML>=6.0"]
+# opencv-python-headless, not opencv-python: the GUI build links against libGL,
+# which does not exist on a server, a Jetson, a Raspberry Pi or inside Docker.
+# This project never opens a window (all output is written to disk), so the
+# headless build is correct everywhere and avoids `ImportError: libGL.so.1`.
+dependencies = ["numpy>=1.23", "opencv-python-headless>=4.8", "PyYAML>=6.0"]
 
 [project.optional-dependencies]
 yolo = ["ultralytics>=8.1", "torch>=2.0"]
