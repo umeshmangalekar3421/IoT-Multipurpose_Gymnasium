@@ -1,0 +1,33 @@
+Proof image layout (point_NNN_landing.jpg)
+==========================================
+
++---------------------------------------------------------------+
+| POINT 5   t=30.09s   frame=903   conf=0.42                    |
+| winner: P1   cause: landing_out                               |
+| score: 2-2   ->   3-2                                         |
+|                                                               |
+| BOUNCE OUT   @(3.40,0.01)m                                    |
+| RALLY END                                                     |
+| POINT                                                         |
+|                                                               |
+|            (court lines projected into the frame)             |
+|                     O   <- ring + crosshair on the landing    |
+|                    OUT       green = IN, red = OUT            |
+|                45 cm from line                                |
+|                                                               |
+|        (green flight trail for the whole rally)               |
+|                                                               |
+|                                        +--------------------+ |
+|                                        |  landing zoom (3x) | |
+|                                        |    o  <- exact pt  | |
+|                                        +--------------------+ |
++---------------------------------------------------------------+
+
+Companion files
+---------------
+point_NNN_trail.jpg       whole-rally trajectory on a single frame
+point_NNN_scoreboard.jpg  rendered scoreboard card
+match_timeline.jpg        proof sheet: every point, winner, cause, score after
+score_timeline.json       machine-readable timeline (same schema as match.json)
+score_timeline.csv        spreadsheet-friendly timeline
+match.json                full match: meta, calibration, points, events, stats

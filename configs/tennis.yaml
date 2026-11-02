@@ -1,0 +1,56 @@
+# Tennis — ITF singles, best of 3 sets, tie-break at 6-6.
+# See configs/badminton.yaml for the full documentation of every key.
+
+sport: tennis
+
+match:
+  format: singles
+  best_of: 3
+  players: [P1, P2]
+  first_server: P1
+
+video:
+  fps: null
+  max_frames: null
+  stride: 1
+
+camera:
+  court_corners_img: null
+  homography: null
+  auto_calibrate: true
+
+detector:
+  ball: classical
+  profile: tennis_ball       # yellow-green blob, works for most hard/clay courts
+  conf: 0.45
+  imgsz: 640
+  device: cpu
+  players: none
+
+tracking:
+  mode: offline
+  gate_px: 90
+  max_coast_frames: 12
+
+events:
+  model: rules
+  model_path: null
+  min_bounce_prominence_px: 6
+  min_bounce_spacing_frames: 4
+  line_margin_m: 0.033      # ITF ball radius ~3.3 cm
+  rally_gap_frames: 150
+  confirm_landing_frames: 10
+  on_track_loss: opponent
+
+evidence:
+  enabled: true
+  out_dir: runs/tennis
+  pre_frames: 20
+  post_frames: 45
+  jpeg_quality: 90
+  annotate: true
+  save_scoreboard_png: true
+
+output:
+  timeline_json: null
+  annotated_video: null

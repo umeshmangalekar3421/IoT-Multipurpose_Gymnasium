@@ -1,0 +1,14 @@
+# Runtime (edge device or laptop)
+numpy>=1.23
+# headless build: no libGL/X11 needed, so it installs on servers, Jetson, Pi and
+# in Docker.  If you see "ImportError: libGL.so.1", you have the GUI build
+# instead - `pip uninstall opencv-python && pip install opencv-python-headless`.
+opencv-python-headless>=4.8
+PyYAML>=6.0
+
+# Optional: only needed for the trained ball detector (detector.ball: yolo)
+# ultralytics>=8.1
+# torch>=2.0
+
+# Development
+pytest>=7.4
