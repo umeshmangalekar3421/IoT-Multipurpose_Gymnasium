@@ -89,7 +89,8 @@ class OfflineLinker:
                  gate_px: float = 140.0,
                  min_track_points: int = 6,
                  min_displacement_px: float = 90.0,
-                 min_mean_speed_px_s: float = 110.0):
+                 min_mean_speed_px_s: float = 110.0,
+                 max_accel_px_s2: float = 26000.0):
         self.fps = float(fps)
         self.max_gap = int(max_gap)
         self.max_speed = float(max_speed_px_s)
@@ -97,6 +98,13 @@ class OfflineLinker:
         self.min_track_points = int(min_track_points)
         self.min_displacement = float(min_displacement_px)
         self.min_mean_speed = float(min_mean_speed_px_s)
+        # A ball can be struck hard, but it cannot teleport.  When the detector
+        # reports ghosts (motion blur smears a fast shuttle into several blobs,
+        # a line flickers, a spectator moves) the greedy linker happily chains
+        # them into one long "track" that jumps around.  Splitting a track at
+        # physically impossible velocity changes keeps those chains from
+        # masquerading as the ball.
+        self.max_accel = float(max_accel_px_s2)
 
     # -- linking ------------------------------------------------------------
     def link(self, candidates: Dict[int, Sequence[Candidate]]) -> List[Track]:
@@ -162,7 +170,42 @@ class OfflineLinker:
                 active.append(Track(points=[c]))
 
         finished.extend(active)
-        return finished
+        split: List[Track] = []
+        for tr in finished:
+            split.extend(self.split_on_jumps(tr))
+        return split
+
+    # -- physical plausibility ---------------------------------------------
+    def split_on_jumps(self, tr: Track) -> List[Track]:
+        """Break a track wherever the implied acceleration is impossible.
+
+        Returns one or more tracks; a smooth flight passes through unchanged.
+        The step across a *gap* is exempt: a ball that was invisible may well
+        have been struck in the meantime, and that is a legitimate discontinuity.
+        """
+        if tr.length < 3:
+            return [tr]
+        pieces: List[Track] = []
+        current: List[Candidate] = [tr.points[0]]
+        v_prev: Optional[Tuple[float, float]] = None
+        for prev, cur in zip(tr.points, tr.points[1:]):
+            dt = max(1e-3, cur.t - prev.t)
+            v = ((cur.xy[0] - prev.xy[0]) / dt, (cur.xy[1] - prev.xy[1]) / dt)
+            jumped = False
+            if v_prev is not None:
+                accel = float(np.hypot(v[0] - v_prev[0], v[1] - v_prev[1])) / dt
+                gap = cur.frame - prev.frame
+                if accel > self.max_accel and gap <= 2:
+                    jumped = True
+            if jumped:
+                pieces.append(Track(points=current))
+                current = [cur]
+                v_prev = None
+            else:
+                current.append(cur)
+                v_prev = v
+        pieces.append(Track(points=current))
+        return [p for p in pieces if p.length >= 3] or [tr]
 
     # -- scoring & selection ------------------------------------------------
     def score(self, tr: Track) -> float:
